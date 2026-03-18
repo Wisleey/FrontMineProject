@@ -1,43 +1,44 @@
-import { KeyRound, ShieldCheck } from "lucide-react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useLocation, useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { FormField } from "@/components/forms/FormField"
-import { useAuth } from "@/hooks/use-auth"
-import { schemaLogin } from "@/validations/auth"
+import { KeyRound, ShieldCheck } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { FormField } from "@/components/forms/FormField";
+import { useAuth } from "@/hooks/use-auth";
+import { schemaLogin } from "@/validations/auth";
 
 function obterDestinoPorPerfil(role) {
   if (role === "REGISTRO") {
-    return "/pagamentos/meus"
+    return "/pagamentos/meus";
   }
 
-  return "/pagamentos/novo"
+  return "/pagamentos/novo";
 }
 
 export function LoginPage() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { entrar, carregandoAuth } = useAuth()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { entrar, carregandoAuth } = useAuth();
 
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm({
     resolver: zodResolver(schemaLogin),
     defaultValues: {
       login: "",
-      senha: ""
-    }
-  })
+      senha: "",
+    },
+  });
 
   async function onSubmit(dados) {
-    const usuario = await entrar(dados)
-    const destino = location.state?.from?.pathname || obterDestinoPorPerfil(usuario.role)
-    navigate(destino, { replace: true })
+    const usuario = await entrar(dados);
+    const destino =
+      location.state?.from?.pathname || obterDestinoPorPerfil(usuario.role);
+    navigate(destino, { replace: true });
   }
 
   return (
@@ -51,7 +52,7 @@ export function LoginPage() {
             </span>
 
             <h1 className="mt-6 text-5xl font-bold leading-tight text-slate-50">
-              Plataforma interna para registro e autorizacao de pagamentos.
+              Plataforma interna para registro e autorização de pagamentos.
             </h1>
 
             <p className="mt-6 text-lg leading-8 text-slate-400">
@@ -63,7 +64,7 @@ export function LoginPage() {
               {[
                 "Fluxos por perfil",
                 "Autenticacao com token",
-                "Historico centralizado"
+                "Historico centralizado",
               ].map((item) => (
                 <div
                   key={item}
@@ -76,12 +77,14 @@ export function LoginPage() {
           </div>
         </div>
 
-        <Card className="mx-auto flex w-full max-w-xl flex-col justify-center">
+        <Card className="mx-auto flex w-full max-w-xl flex-col justify-center p-5 sm:p-8">
           <div className="mb-8">
             <div className="mb-4 inline-flex rounded-2xl bg-sky-500/10 p-3 text-sky-300">
               <KeyRound size={22} />
             </div>
-            <h2 className="text-3xl font-bold text-white">Entrar no sistema</h2>
+            <h2 className="text-2xl font-bold text-white sm:text-3xl">
+              Entrar no sistema
+            </h2>
             <p className="mt-2 text-sm text-slate-400">
               Use seu login corporativo para acessar o ambiente autenticado.
             </p>
@@ -107,5 +110,5 @@ export function LoginPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

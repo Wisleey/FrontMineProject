@@ -1,127 +1,135 @@
-import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { CheckCircle2, CircleDashed, Eye, XCircle } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckCircle2, CircleDashed, Eye, XCircle } from "lucide-react";
 import {
   autorizarPagamentoApi,
   listarPagamentosPendentesApi,
-  rejeitarPagamentoApi
-} from "@/api/payments-api"
-import { EmptyState } from "@/components/feedback/EmptyState"
-import { LoadingState } from "@/components/feedback/LoadingState"
-import { FormField } from "@/components/forms/FormField"
-import { PageHeader } from "@/components/PageHeader"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Modal } from "@/components/ui/modal"
-import { Textarea } from "@/components/ui/textarea"
-import { formatarCnpj, formatarData, formatarMoeda } from "@/utils/formatadores"
-import { toastAviso, toastErro, toastSucesso } from "@/utils/toast"
-import { schemaRejeicao } from "@/validations/payment"
+  rejeitarPagamentoApi,
+} from "@/api/payments-api";
+import { EmptyState } from "@/components/feedback/EmptyState";
+import { LoadingState } from "@/components/feedback/LoadingState";
+import { FormField } from "@/components/forms/FormField";
+import { PageHeader } from "@/components/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Modal } from "@/components/ui/modal";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  formatarCnpj,
+  formatarData,
+  formatarMoeda,
+} from "@/utils/formatadores";
+import { toastAviso, toastErro, toastSucesso } from "@/utils/toast";
+import { schemaRejeicao } from "@/validations/payment";
 
 export function AutorizacaoPage() {
-  const [pagamentos, setPagamentos] = useState([])
-  const [carregando, setCarregando] = useState(true)
-  const [pagamentoSelecionado, setPagamentoSelecionado] = useState(null)
-  const [modalDetalhesAberto, setModalDetalhesAberto] = useState(false)
-  const [modalRejeicaoAberto, setModalRejeicaoAberto] = useState(false)
-  const [processandoId, setProcessandoId] = useState(null)
+  const [pagamentos, setPagamentos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [pagamentoSelecionado, setPagamentoSelecionado] = useState(null);
+  const [modalDetalhesAberto, setModalDetalhesAberto] = useState(false);
+  const [modalRejeicaoAberto, setModalRejeicaoAberto] = useState(false);
+  const [processandoId, setProcessandoId] = useState(null);
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors }
+    formState: { errors },
   } = useForm({
     resolver: zodResolver(schemaRejeicao),
     defaultValues: {
-      motivoRejeicao: ""
-    }
-  })
+      motivoRejeicao: "",
+    },
+  });
 
   async function carregarPendentes() {
     try {
-      setCarregando(true)
-      const resposta = await listarPagamentosPendentesApi()
-      setPagamentos(resposta.dados || [])
+      setCarregando(true);
+      const resposta = await listarPagamentosPendentesApi();
+      setPagamentos(resposta.dados || []);
     } finally {
-      setCarregando(false)
+      setCarregando(false);
     }
   }
 
   useEffect(() => {
-    carregarPendentes()
-  }, [])
+    carregarPendentes();
+  }, []);
 
   function abrirDetalhes(pagamento) {
-    setPagamentoSelecionado(pagamento)
-    setModalDetalhesAberto(true)
+    setPagamentoSelecionado(pagamento);
+    setModalDetalhesAberto(true);
   }
 
   function abrirRejeicao(pagamento) {
-    setPagamentoSelecionado(pagamento)
-    setModalRejeicaoAberto(true)
+    setPagamentoSelecionado(pagamento);
+    setModalRejeicaoAberto(true);
   }
 
   function fecharRejeicao() {
-    setModalRejeicaoAberto(false)
-    setPagamentoSelecionado(null)
-    reset()
+    setModalRejeicaoAberto(false);
+    setPagamentoSelecionado(null);
+    reset();
   }
 
   async function handleAutorizar(pagamento) {
     try {
-      setProcessandoId(pagamento.id)
-      await autorizarPagamentoApi(pagamento.id)
+      setProcessandoId(pagamento.id);
+      await autorizarPagamentoApi(pagamento.id);
       toastSucesso({
         title: "Pagamento autorizado",
-        description: `A solicitacao de ${pagamento.razaoSocial} foi autorizada.`
-      })
-      await carregarPendentes()
+        description: `A solicitacao de ${pagamento.razaoSocial} foi autorizada.`,
+      });
+      await carregarPendentes();
     } catch (erro) {
       toastErro({
-        title: "Falha na autorizacao",
+        title: "Falha na autorização",
         description:
-          erro.response?.data?.mensagem || "Nao foi possivel autorizar o pagamento."
-      })
+          erro.response?.data?.mensagem ||
+          "Nao foi possivel autorizar o pagamento.",
+      });
     } finally {
-      setProcessandoId(null)
+      setProcessandoId(null);
     }
   }
 
   async function onSubmitRejeicao(dados) {
     if (!pagamentoSelecionado) {
-      return
+      return;
     }
 
     try {
-      setProcessandoId(pagamentoSelecionado.id)
-      await rejeitarPagamentoApi(pagamentoSelecionado.id, dados)
+      setProcessandoId(pagamentoSelecionado.id);
+      await rejeitarPagamentoApi(pagamentoSelecionado.id, dados);
       toastAviso({
         title: "Pagamento rejeitado",
-        description: "A rejeicao foi registrada com sucesso."
-      })
-      fecharRejeicao()
-      await carregarPendentes()
+        description: "A rejeicao foi registrada com sucesso.",
+      });
+      fecharRejeicao();
+      await carregarPendentes();
     } catch (erro) {
       toastErro({
         title: "Falha na rejeicao",
         description:
-          erro.response?.data?.mensagem || "Nao foi possivel rejeitar o pagamento."
-      })
+          erro.response?.data?.mensagem ||
+          "Nao foi possivel rejeitar o pagamento.",
+      });
     } finally {
-      setProcessandoId(null)
+      setProcessandoId(null);
     }
   }
 
   return (
     <div>
       <PageHeader
-        titulo="Autorizacao de pagamentos"
+        titulo="Autorização de pagamentos"
         descricao="Analise pagamentos pendentes e registre a decisao com seguranca."
       />
 
-      {carregando ? <LoadingState texto="Carregando pagamentos pendentes..." /> : null}
+      {carregando ? (
+        <LoadingState texto="Carregando pagamentos pendentes..." />
+      ) : null}
 
       {!carregando && pagamentos.length === 0 ? (
         <EmptyState
@@ -146,13 +154,16 @@ export function AutorizacaoPage() {
                     <p>CNPJ: {formatarCnpj(pagamento.cnpjFavorecido)}</p>
                     <p>Valor: {formatarMoeda(pagamento.valor)}</p>
                     <p>Solicitante: {pagamento.solicitante?.nome}</p>
-                    <p>Data do registro: {formatarData(pagamento.dataRegistro)}</p>
+                    <p>
+                      Data do registro: {formatarData(pagamento.dataRegistro)}
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-3">
+                <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
                   <Button
                     variante="contorno"
+                    className="w-full sm:w-auto"
                     onClick={() => abrirDetalhes(pagamento)}
                   >
                     <Eye size={16} />
@@ -160,6 +171,7 @@ export function AutorizacaoPage() {
                   </Button>
                   <Button
                     variante="secundaria"
+                    className="w-full sm:w-auto"
                     onClick={() => abrirRejeicao(pagamento)}
                     disabled={processandoId === pagamento.id}
                   >
@@ -167,11 +179,14 @@ export function AutorizacaoPage() {
                     Rejeitar
                   </Button>
                   <Button
+                    className="w-full sm:w-auto"
                     onClick={() => handleAutorizar(pagamento)}
                     disabled={processandoId === pagamento.id}
                   >
                     <CheckCircle2 size={16} />
-                    {processandoId === pagamento.id ? "Processando..." : "Autorizar"}
+                    {processandoId === pagamento.id
+                      ? "Processando..."
+                      : "Autorizar"}
                   </Button>
                 </div>
               </div>
@@ -183,8 +198,8 @@ export function AutorizacaoPage() {
       <Modal
         aberto={modalDetalhesAberto}
         onClose={() => {
-          setModalDetalhesAberto(false)
-          setPagamentoSelecionado(null)
+          setModalDetalhesAberto(false);
+          setPagamentoSelecionado(null);
         }}
         titulo="Detalhes do pagamento"
         subtitulo="Visualize as informacoes completas da solicitacao."
@@ -193,7 +208,9 @@ export function AutorizacaoPage() {
           <div className="grid gap-4 text-sm text-slate-300">
             <div className="grid gap-4 md:grid-cols-2">
               <Card className="p-4">
-                <p className="text-xs uppercase tracking-wide text-slate-500">Favorecido</p>
+                <p className="text-xs uppercase tracking-wide text-slate-500">
+                  Favorecido
+                </p>
                 <p className="mt-2 font-semibold text-slate-100">
                   {pagamentoSelecionado.razaoSocial}
                 </p>
@@ -202,27 +219,35 @@ export function AutorizacaoPage() {
                 </p>
               </Card>
               <Card className="p-4">
-                <p className="text-xs uppercase tracking-wide text-slate-500">Valor</p>
+                <p className="text-xs uppercase tracking-wide text-slate-500">
+                  Valor
+                </p>
                 <p className="mt-2 font-semibold text-slate-100">
                   {formatarMoeda(pagamentoSelecionado.valor)}
                 </p>
                 <p className="mt-1 text-slate-400">
-                  Registrado em {formatarData(pagamentoSelecionado.dataRegistro)}
+                  Registrado em{" "}
+                  {formatarData(pagamentoSelecionado.dataRegistro)}
                 </p>
               </Card>
             </div>
 
             <Card className="p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Descricao do servico</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">
+                Descricao do servico
+              </p>
               <p className="mt-2 leading-7 text-slate-200">
                 {pagamentoSelecionado.descricaoServico}
               </p>
             </Card>
 
             <Card className="p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Solicitante</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">
+                Solicitante
+              </p>
               <p className="mt-2 text-slate-100">
-                {pagamentoSelecionado.solicitante?.nome} ({pagamentoSelecionado.solicitante?.login})
+                {pagamentoSelecionado.solicitante?.nome} (
+                {pagamentoSelecionado.solicitante?.login})
               </p>
             </Card>
           </div>
@@ -248,16 +273,24 @@ export function AutorizacaoPage() {
             />
           </FormField>
 
-          <div className="flex justify-end gap-3">
-            <Button variante="contorno" onClick={fecharRejeicao}>
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <Button
+              variante="contorno"
+              className="w-full sm:w-auto"
+              onClick={fecharRejeicao}
+            >
               Cancelar
             </Button>
-            <Button type="submit" variante="perigo">
+            <Button
+              type="submit"
+              variante="perigo"
+              className="w-full sm:w-auto"
+            >
               Confirmar rejeicao
             </Button>
           </div>
         </form>
       </Modal>
     </div>
-  )
+  );
 }

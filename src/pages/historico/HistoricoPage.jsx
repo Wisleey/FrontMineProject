@@ -89,37 +89,63 @@ export function HistoricoPage() {
           descricao="Defina um periodo e clique em consultar para visualizar os registros."
         />
       ) : (
-        <Table>
-          <THead>
-            <tr>
-              <TH>Data</TH>
-              <TH>Favorecido</TH>
-              <TH>Valor</TH>
-              <TH>Solicitante</TH>
-              <TH>Autorizador</TH>
-              <TH>Status</TH>
-            </tr>
-          </THead>
-          <TBody>
+        <>
+          <div className="grid gap-4 md:hidden">
             {resultado.map((item) => (
-              <tr key={item.id} className="hover:bg-slate-900/60">
-                <TD>{formatarData(item.dataRegistro)}</TD>
-                <TD>
-                  <div>
-                    <p className="font-medium text-slate-100">{item.razaoSocial}</p>
-                    <p className="mt-1 text-xs text-slate-500">{item.cnpjFavorecido}</p>
+              <Card key={item.id} className="p-4">
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="min-w-0 flex-1 break-words font-medium text-slate-100">
+                      {item.razaoSocial}
+                    </p>
+                    <StatusBadge status={item.status} />
                   </div>
-                </TD>
-                <TD>{formatarMoeda(item.valor)}</TD>
-                <TD>{item.solicitante?.nome || "-"}</TD>
-                <TD>{item.autorizador?.nome || "-"}</TD>
-                <TD>
-                  <StatusBadge status={item.status} />
-                </TD>
-              </tr>
+                  <div className="grid gap-2 text-sm text-slate-300">
+                    <p>Data: {formatarData(item.dataRegistro)}</p>
+                    <p>CNPJ: {item.cnpjFavorecido}</p>
+                    <p>Valor: {formatarMoeda(item.valor)}</p>
+                    <p>Solicitante: {item.solicitante?.nome || "-"}</p>
+                    <p>Autorizador: {item.autorizador?.nome || "-"}</p>
+                  </div>
+                </div>
+              </Card>
             ))}
-          </TBody>
-        </Table>
+          </div>
+
+          <div className="hidden md:block">
+            <Table>
+              <THead>
+                <tr>
+                  <TH>Data</TH>
+                  <TH>Favorecido</TH>
+                  <TH>Valor</TH>
+                  <TH>Solicitante</TH>
+                  <TH>Autorizador</TH>
+                  <TH>Status</TH>
+                </tr>
+              </THead>
+              <TBody>
+                {resultado.map((item) => (
+                  <tr key={item.id} className="hover:bg-slate-900/60">
+                    <TD>{formatarData(item.dataRegistro)}</TD>
+                    <TD>
+                      <div>
+                        <p className="font-medium text-slate-100">{item.razaoSocial}</p>
+                        <p className="mt-1 text-xs text-slate-500">{item.cnpjFavorecido}</p>
+                      </div>
+                    </TD>
+                    <TD>{formatarMoeda(item.valor)}</TD>
+                    <TD>{item.solicitante?.nome || "-"}</TD>
+                    <TD>{item.autorizador?.nome || "-"}</TD>
+                    <TD>
+                      <StatusBadge status={item.status} />
+                    </TD>
+                  </tr>
+                ))}
+              </TBody>
+            </Table>
+          </div>
+        </>
       )}
 
       {resultado.length > 0 ? (

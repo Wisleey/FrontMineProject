@@ -65,7 +65,7 @@ export function NovoPagamentoPage() {
         descricao="Cadastre uma nova solicitacao de pagamento para fornecedor."
       />
 
-      <Card className="max-w-4xl">
+      <Card className="max-w-4xl p-4 sm:p-6">
         <form className="grid gap-6 md:grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
           <FormField
             label="CNPJ do favorecido"
@@ -138,13 +138,13 @@ export function NovoPagamentoPage() {
             </FormField>
           </div>
 
-          <div className="md:col-span-2 flex flex-wrap items-center gap-3">
-            <Button type="submit" disabled={salvando}>
+          <div className="md:col-span-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <Button type="submit" className="w-full sm:w-auto" disabled={salvando}>
               <Save size={16} />
               {salvando ? "Enviando..." : "Enviar pagamento"}
             </Button>
 
-            <div className="inline-flex items-center gap-2 text-sm text-slate-400">
+            <div className="inline-flex items-start gap-2 text-sm leading-6 text-slate-400">
               <Landmark size={16} />
               O backend definira automaticamente data, solicitante e status inicial.
             </div>
